@@ -7,6 +7,7 @@ import (
 	"protogen/protoquote"
 	"protogen/prototype"
 	"regexp"
+	"strconv"
 	"syscall"
 )
 
@@ -24,7 +25,7 @@ var (
 )
 
 func init() {
-	regexHostIpV4 = regexp.MustCompile(`^(((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|$)){4})`)
+	regexHostIpV4 = regexp.MustCompile(`^(((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\.|:|$)){4}\d{2,5})`)
 	regexHostIpV6 = regexp.MustCompile(`^(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))$`)
 	regexHostDOmain = regexp.MustCompile(`^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]$`)
 }
@@ -33,49 +34,77 @@ func main() {
 	firstArg := os.Args[1]
 	restArgs := prototype.StrSlice(os.Args[2:])
 
-	progFunc, protoName := getProgFunc(firstArg)
+	progFunc, protoName, cleanerUpper := getProgFunc(firstArg)
 	go progFunc.executeSuitable(restArgs)
 
-	polForExit(protoName)
+	pollForExit(protoName, cleanerUpper)
 
 }
 
-func polForExit(proto string) {
+func pollForExit(proto string, cleanerUpper func()) {
+	fmt.Printf("Starting ProtoGen on %s\n", proto)
+
 	c := make(chan os.Signal, 1)
+	finish := make(chan int)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-c
-		fmt.Printf("ProtoGen running protocol '%s' was interrupted.\n", proto)
-		os.Exit(0)
+		cleanerUpper()
 	}()
+
+	<-finish
 }
 
-func getProgFunc(firstArg string) (ProgramFunction, string) {
+func getProgFunc(firstArg string) (ProgramFunction, string, func()) {
 	switch firstArg {
-	case "quote":
-		return PROTOQUOTE, "ProtoQuote"
+	case "quote", "protoquote":
+		return PROTOQUOTE, "ProtoQuote", protoquote.CleanUpProtoQuote
 	default:
 		break
 	}
 
-	return NONE, "None"
+	return NONE, "None", nil
 }
 
 func (prg ProgramFunction) executeSuitable(argsSlice prototype.StrSlice) {
 	switch prg {
 	case PROTOQUOTE:
-		checkArgsSliceLen(argsSlice, 2)
-		address := getArgOut(argsSlice, "-a", "--addr", true)
-		protoquote.ProtoQuoteMain(address)
+		checkArgsSliceLen(argsSlice, 2, 4)
+		address := checkHostAddr(getArgOut(argsSlice, "-a", "--addr", true))
+		interval := parseAndCheckInterval(getArgOut(argsSlice, "-i", "--interval", false))
+		protoquote.ProtoQuoteMain(address, interval)
 	case NONE:
 		errorOutStr("No valid subsystem given as first argument")
 	}
 }
 
-func checkArgsSliceLen(argsSlice prototype.StrSlice, mustBeLen int) {
-	if len(argsSlice) != mustBeLen {
-		errorOutStr(fmt.Sprintf("Wrong number of arguments (plus flags!) given after the subcommand, must be %d", mustBeLen))
+func parseAndCheckInterval(arg string) int {
+	integer, err := strconv.ParseUint(arg, 10, 8)
+	if err != nil {
+		fmt.Println("Wrong or no argument for interval, setting to 5")
+		return 5
 	}
+
+	if integer < 5 || integer > 50 {
+		errorOutStr("Interval must be between 5 and 50")
+	}
+
+	return int(integer)
+}
+
+func checkArgsSliceLen(argsSlice prototype.StrSlice, minMustBeLen, maxMustBeLen int) {
+	if !(len(argsSlice) >= minMustBeLen && len(argsSlice) <= maxMustBeLen) {
+		errorOutStr(fmt.Sprintf("Wrong number of arguments (plus flags!) given after the subcommand, must be between %d and %d", minMustBeLen, maxMustBeLen))
+	}
+}
+
+func checkHostAddr(addr string) string {
+	if regexHostIpV4.MatchString(addr) || regexHostIpV6.MatchString(addr) || regexHostDOmain.MatchString(addr) {
+		return addr
+	}
+
+	errorOutStr("Address must be valid IPV4, IPV6 and Domain Name")
+	return ""
 }
 
 func getArgOut(argsSlice prototype.StrSlice, seekingShort, seekingLong string, required bool) string {
@@ -84,9 +113,8 @@ func getArgOut(argsSlice prototype.StrSlice, seekingShort, seekingLong string, r
 	for before, after := range argsSlice.ZipIt() {
 		switch before {
 		case seekingShort, seekingLong:
-			if regexHostIpV4.MatchString(after) || regexHostIpV6.MatchString(after) || regexHostDOmain.MatchString(after) {
-				argValue = after
-			} else if after == prototype.NULLSTR {
+			argValue = after
+			if after == prototype.NULLSTR {
 				errorOutStr("You must pass an argument to the address flag")
 			}
 		}

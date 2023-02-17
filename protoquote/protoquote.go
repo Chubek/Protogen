@@ -6,6 +6,8 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"os"
+	"time"
 )
 
 type quoteResponse struct {
@@ -17,15 +19,34 @@ type quoteResponse struct {
 	Tags       []string `json:"tags"`
 }
 
-func (qresp *quoteResponse) filterAuthorAndQute() (string, string) {
-	return qresp.Author, qresp.Conent
+type quoteHandler struct {
+	intervalMin int
+	actNowChan  chan int
 }
 
-func ProtoQuoteMain(addr string) {
+var (
+	currQuote  string = ""
+	currAuthor string = ""
+)
+
+func init() {
+	initAuthor, initQuote := readAuthorAndQuoteFromAPI()
+
+	currAuthor = initAuthor
+	currQuote = initQuote
+}
+
+func ProtoQuoteMain(addr string, interval int) {
+	createAndRunQuoteHandler(interval)
+
 	tcpListener, err := net.Listen("tcp", addr)
 	handleError(err)
 
 	handleTcpListener(tcpListener)
+}
+
+func (qresp *quoteResponse) filterAuthorAndQute() (string, string) {
+	return qresp.Author, qresp.Conent
 }
 
 func handleTcpListener(listener net.Listener) {
@@ -33,7 +54,7 @@ func handleTcpListener(listener net.Listener) {
 		conn, err := listener.Accept()
 		handleError(err)
 
-		handleConn(conn)
+		go handleConn(conn)
 	}
 }
 
@@ -44,13 +65,24 @@ func parsequoteResponse(inResp []byte) quoteResponse {
 	return qresponse
 }
 
-func getAuthorAndQuote() (string, string) {
+func handleConn(conn net.Conn) {
+	defer conn.Close()
+
+	nowTime := time.Now().String()
+	applicationFrame := fmt.Sprintf("PTQP v1 R+\r\n\r\nNow = %s\r\nAuthor = %s\r\nQuote = \"%s\"\r\n", nowTime, currAuthor, currQuote)
+
+	conn.Write([]byte(applicationFrame))
+}
+
+func handleError(err error) {
+	if err != nil {
+		fmt.Printf("\033[1;31mError occured:\033[0m %s\n", err)
+	}
+}
+
+func readAuthorAndQuoteFromAPI() (string, string) {
 	resp, err := http.Get("https://api.quotable.io/random")
 	handleError(err)
-
-	if resp.StatusCode == 429 {
-		return "Jay Jonah Jameson", "Sorry, Peter, this damn API has a limit of 180 quotes per minute. You ran out of luck! Now go smoke that Marijuana out, if you catch my drift!"
-	}
 
 	body, err := io.ReadAll(resp.Body)
 	handleError(err)
@@ -60,15 +92,31 @@ func getAuthorAndQuote() (string, string) {
 	return qresp.filterAuthorAndQute()
 }
 
-func handleConn(conn net.Conn) {
-	defer conn.Close()
+func (qh *quoteHandler) sendMessageUponInterval() {
+	go func() {
+		for {
+			time.Sleep(time.Minute * time.Duration(qh.intervalMin))
+			qh.actNowChan <- 1
+		}
+	}()
 
-	author, quote := getAuthorAndQuote()
-	applicationFrame := fmt.Sprintf("\033[1;33mSup my friend from Reddit!\033[0m Remember not to accept candies from strangers, especially ones wearing fursuits!\n%s says: \"%s\"\nThis was a message sent to you via a Transfer Control Protocl (TCP). \n\n -Chubak, github.com/chubek", author, quote)
+	for {
+		<-qh.actNowChan
 
-	conn.Write([]byte(applicationFrame))
+		newAuthor, newQuote := readAuthorAndQuoteFromAPI()
+
+		currAuthor = newAuthor
+		currQuote = newQuote
+	}
 }
 
-func handleError(err error) {
-	fmt.Printf("\033[1;31mError occured:\033[0m %s\n", err)
+func createAndRunQuoteHandler(interval int) {
+	quoteHandler := quoteHandler{intervalMin: interval, actNowChan: make(chan int)}
+
+	go quoteHandler.sendMessageUponInterval()
+}
+
+func CleanUpProtoQuote() {
+	fmt.Println("ProtoGen's ProtoQuote server on INET/TCP has been terminated")
+	os.Exit(0)
 }
