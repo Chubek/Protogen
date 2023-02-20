@@ -3,7 +3,7 @@ package prototype
 const NULLSTR = "\x00\x12\x01\x02"
 
 type UsualType interface {
-	int | string | byte
+	int | string | byte | rune
 }
 
 type StrSlice []string

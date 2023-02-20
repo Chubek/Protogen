@@ -10,6 +10,12 @@ import (
 	"time"
 )
 
+const (
+	VERSION_CONTROL = "v1"
+	SERVER_NAME 	= "SimplePRTQTv0.1"
+)
+
+
 type quoteResponse struct {
 	Id         string   `json:"_id"`
 	Conent     string   `json:"content"`
@@ -30,10 +36,7 @@ var (
 )
 
 func init() {
-	initAuthor, initQuote := readAuthorAndQuoteFromAPI()
-
-	currAuthor = initAuthor
-	currQuote = initQuote
+	currAuthor, currQuote = readAuthorAndQuoteFromAPI()
 }
 
 func ProtoQuoteMain(addr string, interval int) {
@@ -69,7 +72,7 @@ func handleConn(conn net.Conn) {
 	defer conn.Close()
 
 	nowTime := time.Now().String()
-	applicationFrame := fmt.Sprintf("PTQP v1 R+\r\n\r\nNow = %s\r\nAuthor = %s\r\nQuote = \"%s\"\r\n", nowTime, currAuthor, currQuote)
+	applicationFrame := fmt.Sprintf("PTQP %s %s\r\n\r\nNow = %s\r\nAuthor = %s\r\nQuote = \"%s\"\r\n", VERSION_CONTROL, SERVER_NAME, nowTime, currAuthor, currQuote)
 
 	conn.Write([]byte(applicationFrame))
 }
@@ -117,6 +120,6 @@ func createAndRunQuoteHandler(interval int) {
 }
 
 func CleanUpProtoQuote() {
-	fmt.Println("ProtoGen's ProtoQuote server on INET/TCP has been terminated")
+	fmt.Println("\nProtoGen's ProtoQuote server on TCP has been terminated")
 	os.Exit(0)
 }
