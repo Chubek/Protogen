@@ -24,7 +24,6 @@ const (
 	GLOBAL_PROTOCOL_NAME    string        = "PTDP"
 	GLOBAL_DESTROY_READER   string        = "()"
 	GLOBAL_TUPLE_SEP        rune          = ';'
-	GLOBAL_TTL              int           = 10
 	GLOBAL_CLEAR_INTERVAL   int           = 1
 	GLOBAL_FILEPATH         pathType      = 31
 	GLOBAL_DIRPATH          pathType      = 32
@@ -77,6 +76,11 @@ const (
 	STATUS_DID_FAIL         successStatus = 11
 )
 
+var (
+	globalTtl = 10
+	socketPath = ""
+)
+
 type entityPath struct {
 	ty   pathType
 	path string
@@ -113,7 +117,9 @@ type requestParser struct {
 	pathOrHash      bArr
 }
 
-func ProtoDirMain(sockPath string) {
+func ProtoDirMain(sockPath string, globalTtlSet int) {
+	globalTtl = globalTtlSet
+	socketPath = sockPath
 	state := initProtoDirState()
 	listener, err := net.Listen("unix", sockPath)
 	handleError(err)
@@ -610,7 +616,7 @@ func (ps *pathState) setForGC() {
 }
 
 func (ps *pathState) waitForGC() {
-	time.Sleep(time.Minute * time.Duration(GLOBAL_TTL))
+	time.Sleep(time.Minute * time.Duration(globalTtl))
 	ps.setForGC()
 }
 func (ps *pathState) matchHash(hash string) bool {
@@ -833,4 +839,10 @@ func (r responseCode) toString() string {
 	}
 
 	return fmt.Sprintf("%d - %s\n\n", r, respText)
+}
+
+func CleanUpProtoDir() {
+	fmt.Printf("\nProtoGen's ProtoQuote server on TCP has been terminated\nRemoving socket file %s", socketPath)
+	os.Remove(socketPath)
+	os.Exit(0)
 }
