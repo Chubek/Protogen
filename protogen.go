@@ -83,7 +83,8 @@ func (prg ProgramFunction) executeSuitable(argsSlice prototype.StrSlice) {
 		checkArgsSliceLen(argsSlice, 1, 2)
 		path := checkUnixPath(getArgOut(argsSlice, "-p", "--path", true))
 		ttl := parseAndCheckTtl(getArgOut(argsSlice, "-t", "--ttl", false))
-		protodir.ProtoDirMain(path, ttl)
+		clearInterval := parseAndCheckClearInterval(getArgOut(argsSlice, "-c", "--clear_interval", false))
+		protodir.ProtoDirMain(path, ttl, clearInterval)
 	case NONE:
 		errorOutStr("No valid subsystem given as first argument")
 	}
@@ -98,6 +99,20 @@ func parseAndCheckInterval(arg string) int {
 
 	if integer < 5 || integer > 50 {
 		errorOutStr("Interval must be between 5 and 50")
+	}
+
+	return int(integer)
+}
+
+func parseAndCheckClearInterval(arg string) int {
+	integer, err := strconv.ParseUint(arg, 10, 8)
+	if err != nil {
+		fmt.Println("Wrong or no argument for clear interval, setting to 45")
+		return 45
+	}
+
+	if integer < 10 || integer > 300 {
+		errorOutStr("Clear interval must be between 10 and 300")
 	}
 
 	return int(integer)
