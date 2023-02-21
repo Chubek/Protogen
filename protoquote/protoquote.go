@@ -48,6 +48,25 @@ func ProtoQuoteMain(addr string, interval int) {
 	handleTcpListener(tcpListener)
 }
 
+
+func (qh *quoteHandler) sendMessageUponInterval() {
+	go func() {
+		for {
+			time.Sleep(time.Minute * time.Duration(qh.intervalMin))
+			qh.actNowChan <- 1
+		}
+	}()
+
+	for {
+		<-qh.actNowChan
+
+		newAuthor, newQuote := readAuthorAndQuoteFromAPI()
+
+		currAuthor = newAuthor
+		currQuote = newQuote
+	}
+}
+
 func (qresp *quoteResponse) filterAuthorAndQute() (string, string) {
 	return qresp.Author, qresp.Conent
 }
@@ -76,12 +95,12 @@ func handleConn(conn net.Conn) {
 
 	conn.Write([]byte(applicationFrame))
 }
-
 func handleError(err error) {
 	if err != nil {
 		fmt.Printf("\033[1;31mError occured:\033[0m %s\n", err)
 	}
 }
+
 
 func readAuthorAndQuoteFromAPI() (string, string) {
 	resp, err := http.Get("https://api.quotable.io/random")
@@ -95,23 +114,6 @@ func readAuthorAndQuoteFromAPI() (string, string) {
 	return qresp.filterAuthorAndQute()
 }
 
-func (qh *quoteHandler) sendMessageUponInterval() {
-	go func() {
-		for {
-			time.Sleep(time.Minute * time.Duration(qh.intervalMin))
-			qh.actNowChan <- 1
-		}
-	}()
-
-	for {
-		<-qh.actNowChan
-
-		newAuthor, newQuote := readAuthorAndQuoteFromAPI()
-
-		currAuthor = newAuthor
-		currQuote = newQuote
-	}
-}
 
 func createAndRunQuoteHandler(interval int) {
 	quoteHandler := quoteHandler{intervalMin: interval, actNowChan: make(chan int)}
