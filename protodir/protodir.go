@@ -21,74 +21,82 @@ type successStatus int
 type bArr []byte
 
 const (
-	GLOBAL_VERSION_CONTROL  string        = "v1"
-	GLOBAL_PROTOCOL_NAME    string        = "PTDP"
-	GLOBAL_DESTROY_READER   string        = "()"
-	GLOBAL_TRIMMER          string        = " \n\r\x00"
-	GLOBAL_TUPLE_SEP        string        = ";"
-	COMM_INIT_STATE         string        = "INIT_STATE"
-	COMM_CD_SD              string        = "CD_SUBDIR"
-	COMM_STAT               string        = "STAT_ENTITY"
-	COMM_READ_BYTES         string        = "READ_BYTES"
-	COMM_LIST_DIR           string        = "LIST_DIR"
-	COMM_LIST_FILES         string        = "LIST_FILES"
-	COMM_LIST_SUBDIRS       string        = "LIST_SUBDIRS"
-	COMM_LIST_STATES        string        = "LIST_STATES"
-	COMM_WAL_TREE           string        = "WALK_TREE"
-	ERR_PARSE_COMM          string        = "ERROR_PARSE_COMM"
-	ERR_WRONG_COMM          string        = "ERROR_WRONG_COMM"
-	ERR_PARSE_HASH          string        = "ERROR_PARSE_PATH_OR_HASH"
-	ERR_PARSE_PNAME         string        = "ERROR_PARSE_PROTOCOL_NAME"
-	ERR_PARSE_PVER          string        = "ERROR_PARSE_VERSION_CONTROL"
-	ERR_TWO_HASH            string        = "ERROR_NEEDS_TWO_HASH"
-	GLOBAL_FILEPATH         pathType      = 31
-	GLOBAL_DIRPATH          pathType      = 32
-	ACT_INIT_STATE          requestCode   = 0
-	ACT_CD_SUBDIR           requestCode   = 12
-	ACT_LIST_DIR            requestCode   = 22
-	ACT_READ_BYTES          requestCode   = 32
-	ACT_STAT_ENTITY         requestCode   = 42
-	ACT_LIST_SUBDIRS        requestCode   = 52
-	ACT_LIST_FILES          requestCode   = 62
-	ACT_WALK_TREE           requestCode   = 72
-	ACT_LIST_STATE          requestCode   = 82
-	PARSE_ERROR_PNAME       requestCode   = 10
-	PARSE_ERROR_PVER        requestCode   = 11
-	PARSE_ERROR_COMM        requestCode   = 13
-	PARSE_ERROR_PATH        requestCode   = 14
-	RESPONSE_NEED_TWO_HASH  responseCode  = 15
-	RESPONSE_INIT_STATE_OK  responseCode  = 12
-	RESPONSE_CD_SUBDIR_OK   responseCode  = 13
-	RESPONSE_READ_FILE_OK   responseCode  = 22
-	RESPONSE_STAT_ENTITY_OK responseCode  = 23
-	RESPONSE_DIR_LISTED     responseCode  = 32
-	RESPONSE_FILES_LISTED   responseCode  = 33
-	RESPONSE_SUBDIRS_LISTED responseCode  = 34
-	RESPONSE_DIR_WALKED     responseCode  = 42
-	RESPONSE_LISTED_STATES  responseCode  = 52
-	RESPONSE_PARSE_FAILED   responseCode  = 100
-	RESPONSE_NO_DIR         responseCode  = 110
-	RESPONSE_NO_HASH        responseCode  = 120
-	RESPONSE_NO_STATE       responseCode  = 130
-	RESPONSE_NO_EXIST       responseCode  = 140
-	RESPONSE_WALK_FAILED    responseCode  = 150
-	RESPONSE_READ_FAILED    responseCode  = 160
-	RESPONSE_STAT_FAILED    responseCode  = 170
-	RESPONSE_WRONG_COMM     responseCode  = 180
-	RESPONSE_IS_NOT_FILE    responseCode  = 190
-	STATUS_NOT_EXISTS       successStatus = 0
-	STATUS_NO_HASH          successStatus = 1
-	STATUS_EXISTS           successStatus = 3
-	STATUS_ISNOTDIR         successStatus = 4
-	STATUS_ISNOTFILE        successStatus = 5
-	STATUS_IS_READ          successStatus = 6
-	STATUS_DID_CD           successStatus = 7
-	STATUS_WALK_FAIL        successStatus = 8
-	STATUS_WALK_SUCCESS     successStatus = 9
-	STATUS_DID_STAT         successStatus = 10
-	STATUS_DID_FAIL         successStatus = 11
-	STATUS_DID_SPLIT        successStatus = 12
-	STATUS_SPLIT_FAIL       successStatus = 13
+	GLOBAL_VERSION_CONTROL     string        = "v1"
+	GLOBAL_PROTOCOL_NAME       string        = "PTDP"
+	GLOBAL_DESTROY_READER      string        = "()"
+	GLOBAL_HEADER_PREFIX       string        = "$"
+	GLOBAL_LIST_SUBDIRS_HEADER string        = "LIST_SUBDIRS"
+	GLOBAL_LIST_FILES_HEADER   string        = "LIST_FILES"
+	GLOBAL_LIST_DIR_HEADER     string        = "LIST_DIR"
+	GLOBAL_STAT_HEADER         string        = "STAT_ENTITY"
+	GLOBAL_WALK_HEADER         string        = "WALK_TREE"
+	GLOBAL_READ_HEADER         string        = "READ_BYTES"
+	GLOBAL_TRIMMER             string        = " \n\r\x00"
+	GLOBAL_TUPLE_SEP           string        = ";"
+	COMM_INIT_STATE            string        = "INIT_STATE"
+	COMM_CD_SD                 string        = "CD_SUBDIR"
+	COMM_STAT                  string        = "STAT_ENTITY"
+	COMM_READ_BYTES            string        = "READ_BYTES"
+	COMM_LIST_DIR              string        = "LIST_DIR"
+	COMM_LIST_FILES            string        = "LIST_FILES"
+	COMM_LIST_SUBDIRS          string        = "LIST_SUBDIRS"
+	COMM_LIST_STATES           string        = "LIST_STATES"
+	COMM_WAL_TREE              string        = "WALK_TREE"
+	ERR_PARSE_COMM             string        = "ERROR_PARSE_COMM"
+	ERR_WRONG_COMM             string        = "ERROR_WRONG_COMM"
+	ERR_PARSE_HASH             string        = "ERROR_PARSE_PATH_OR_HASH"
+	ERR_PARSE_PNAME            string        = "ERROR_PARSE_PROTOCOL_NAME"
+	ERR_PARSE_PVER             string        = "ERROR_PARSE_VERSION_CONTROL"
+	ERR_TWO_HASH               string        = "ERROR_NEEDS_TWO_HASH"
+	GLOBAL_FILEPATH            pathType      = 31
+	GLOBAL_DIRPATH             pathType      = 32
+	ACT_INIT_STATE             requestCode   = 0
+	ACT_CD_SUBDIR              requestCode   = 12
+	ACT_LIST_DIR               requestCode   = 22
+	ACT_READ_BYTES             requestCode   = 32
+	ACT_STAT_ENTITY            requestCode   = 42
+	ACT_LIST_SUBDIRS           requestCode   = 52
+	ACT_LIST_FILES             requestCode   = 62
+	ACT_WALK_TREE              requestCode   = 72
+	ACT_LIST_STATE             requestCode   = 82
+	PARSE_ERROR_PNAME          requestCode   = 10
+	PARSE_ERROR_PVER           requestCode   = 11
+	PARSE_ERROR_COMM           requestCode   = 13
+	PARSE_ERROR_PATH           requestCode   = 14
+	RESPONSE_NEED_TWO_HASH     responseCode  = 15
+	RESPONSE_INIT_STATE_OK     responseCode  = 12
+	RESPONSE_CD_SUBDIR_OK      responseCode  = 13
+	RESPONSE_READ_FILE_OK      responseCode  = 22
+	RESPONSE_STAT_ENTITY_OK    responseCode  = 23
+	RESPONSE_DIR_LISTED        responseCode  = 32
+	RESPONSE_FILES_LISTED      responseCode  = 33
+	RESPONSE_SUBDIRS_LISTED    responseCode  = 34
+	RESPONSE_DIR_WALKED        responseCode  = 42
+	RESPONSE_LISTED_STATES     responseCode  = 52
+	RESPONSE_PARSE_FAILED      responseCode  = 100
+	RESPONSE_NO_DIR            responseCode  = 110
+	RESPONSE_NO_HASH           responseCode  = 120
+	RESPONSE_NO_STATE          responseCode  = 130
+	RESPONSE_NO_EXIST          responseCode  = 140
+	RESPONSE_WALK_FAILED       responseCode  = 150
+	RESPONSE_READ_FAILED       responseCode  = 160
+	RESPONSE_STAT_FAILED       responseCode  = 170
+	RESPONSE_WRONG_COMM        responseCode  = 180
+	RESPONSE_IS_NOT_FILE       responseCode  = 190
+	RESPONSE_IS_NOT_DIR        responseCode  = 200
+	STATUS_NOT_EXISTS          successStatus = 0
+	STATUS_NO_HASH             successStatus = 1
+	STATUS_EXISTS              successStatus = 3
+	STATUS_ISNOTDIR            successStatus = 4
+	STATUS_ISNOTFILE           successStatus = 5
+	STATUS_IS_READ             successStatus = 6
+	STATUS_DID_CD              successStatus = 7
+	STATUS_WALK_FAIL           successStatus = 8
+	STATUS_WALK_SUCCESS        successStatus = 9
+	STATUS_DID_STAT            successStatus = 10
+	STATUS_DID_FAIL            successStatus = 11
+	STATUS_DID_SPLIT           successStatus = 12
+	STATUS_SPLIT_FAIL          successStatus = 13
 )
 
 var (
@@ -397,7 +405,7 @@ func (pdr *protoDirState) handleRequestCDSubDir(hashState, hashDir string) respo
 }
 
 func (pdr *protoDirState) handleRequestListStates() ([]byte, responseCode) {
-	listStates := ""
+	listStates := GLOBAL_HEADER_PREFIX + "LIST_STATES;\n"
 	for _, state := range pdr.states {
 		listStates += "\n"
 		listStates += state.toString()
@@ -420,7 +428,7 @@ func (pdr *protoDirState) handleRequestListSubDirs(hashState string) ([]byte, re
 
 	res := state.path.dirsToString()
 
-	return []byte(res), RESPONSE_SUBDIRS_LISTED
+	return addHeader(state.path.currDir, GLOBAL_LIST_SUBDIRS_HEADER, []byte(res)), RESPONSE_SUBDIRS_LISTED
 }
 
 func (pdr *protoDirState) handleRequestListFiles(hashState string) ([]byte, responseCode) {
@@ -431,7 +439,7 @@ func (pdr *protoDirState) handleRequestListFiles(hashState string) ([]byte, resp
 
 	res := state.path.filesToSting()
 
-	return []byte(res), RESPONSE_FILES_LISTED
+	return addHeader(state.path.currDir, GLOBAL_LIST_FILES_HEADER, []byte(res)), RESPONSE_FILES_LISTED
 }
 
 func (pdr *protoDirState) handleRequestWholeDir(hashState string) ([]byte, responseCode) {
@@ -442,7 +450,7 @@ func (pdr *protoDirState) handleRequestWholeDir(hashState string) ([]byte, respo
 
 	res := state.path.dirsAndFilesToString()
 
-	return []byte(res), RESPONSE_DIR_LISTED
+	return addHeader(state.path.currDir, GLOBAL_LIST_DIR_HEADER, []byte(res)), RESPONSE_DIR_LISTED
 }
 
 func (pdr *protoDirState) handleRequestWalkDir(hashState string) ([]byte, responseCode) {
@@ -452,11 +460,15 @@ func (pdr *protoDirState) handleRequestWalkDir(hashState string) ([]byte, respon
 	}
 
 	walked, stat := state.path.walkDirAndToBytes()
-	if stat != STATUS_WALK_SUCCESS {
+	if stat == STATUS_ISNOTDIR {
+		return nil, RESPONSE_IS_NOT_DIR
+	} else if stat == STATUS_NOT_EXISTS {
+		return nil, RESPONSE_NO_EXIST
+	} else if stat == STATUS_WALK_FAIL {
 		return nil, RESPONSE_WALK_FAILED
 	}
 
-	return walked, RESPONSE_DIR_WALKED
+	return addHeader(state.path.currDir, GLOBAL_WALK_HEADER, walked), RESPONSE_DIR_WALKED
 }
 
 func (pdr *protoDirState) handleRequestReadFile(hashState, hashFile string) ([]byte, responseCode) {
@@ -465,7 +477,7 @@ func (pdr *protoDirState) handleRequestReadFile(hashState, hashFile string) ([]b
 		return nil, RESPONSE_NO_STATE
 	}
 
-	read, stat := state.path.filterAndReadFile(hashFile)
+	read, path, stat := state.path.filterAndReadFile(hashFile)
 
 	if stat == STATUS_ISNOTFILE {
 		return nil, RESPONSE_IS_NOT_FILE
@@ -475,7 +487,7 @@ func (pdr *protoDirState) handleRequestReadFile(hashState, hashFile string) ([]b
 		return nil, RESPONSE_NO_HASH
 	}
 
-	return read, RESPONSE_READ_FILE_OK
+	return addHeader(path, GLOBAL_READ_HEADER, read), RESPONSE_READ_FILE_OK
 }
 
 func (pdr *protoDirState) handleRequestStat(hashState, hashEntity string) ([]byte, responseCode) {
@@ -484,44 +496,46 @@ func (pdr *protoDirState) handleRequestStat(hashState, hashEntity string) ([]byt
 		return nil, RESPONSE_NO_STATE
 	}
 
-	entityStat, stat := state.path.filterAndStatEntity(hashEntity)
+	entityStat, path, stat := state.path.filterAndStatEntity(hashEntity)
 
-	if stat != STATUS_DID_STAT {
-		return nil, RESPONSE_STAT_FAILED
+	if stat == STATUS_NOT_EXISTS {
+		return nil, RESPONSE_NO_EXIST
+	} else if stat == STATUS_NO_HASH {
+		return nil, RESPONSE_NO_HASH
 	}
 
-	return entityStat, RESPONSE_STAT_ENTITY_OK
+	return addHeader(path, GLOBAL_STAT_HEADER, entityStat), RESPONSE_STAT_ENTITY_OK
 }
 
-func (ep entityPath) readFile(rootDir string) ([]byte, successStatus) {
+func (ep entityPath) readFile(rootDir string) ([]byte, string, successStatus) {
 	if ep.ty == GLOBAL_DIRPATH {
-		return nil, STATUS_ISNOTFILE
+		return nil, "", STATUS_ISNOTFILE
 	}
 
-	contents, err := os.ReadFile(filepath.Join(rootDir, ep.path))
+	path := filepath.Join(rootDir, ep.path)
+	contents, err := os.ReadFile(path)
 	if os.IsNotExist(err) {
-		return nil, STATUS_NOT_EXISTS
+		return nil, "", STATUS_NOT_EXISTS
 	}
 
-	return contents, STATUS_IS_READ
+	return contents, path, STATUS_IS_READ
 }
 
-func (ep entityPath) statEntity(rootDir string) ([]byte, successStatus) {
-	stat, err := os.Stat(filepath.Join(rootDir, ep.path))
+func (ep entityPath) statEntity(rootDir string) ([]byte, string, successStatus) {
+	path := filepath.Join(rootDir, ep.path)
+	stat, err := os.Stat(path)
 	if os.IsNotExist(err) {
-		return nil, STATUS_NOT_EXISTS
+		return nil, "", STATUS_NOT_EXISTS
 	}
 
-	statString := fmt.Sprintf(`
-	IsDir: %t;
-	ModTime: %s;
-	Mode: %s;
-	Name: %s;
-	Size: %d;
-	Sys: %s;
-	`, stat.IsDir(), stat.ModTime(), stat.Mode().String(), stat.Name(), stat.Size(), stat.Sys())
+	statString := fmt.Sprintf(`IsDir: %t;
+ModTime: %s;
+Mode: %s;
+Name: %s;
+Size: %d;
+	`, stat.IsDir(), stat.ModTime(), stat.Mode().String(), stat.Name(), stat.Size())
 
-	return []byte(statString), STATUS_DID_STAT
+	return []byte(statString), path, STATUS_DID_STAT
 }
 
 func (ep entityPath) matchHash(hash string) bool {
@@ -655,10 +669,10 @@ func (p *pathCollective) setFilesAndSubDirs() successStatus {
 	return result
 }
 
-func (p *pathCollective) filterAndReadFile(hash string) ([]byte, successStatus) {
+func (p *pathCollective) filterAndReadFile(hash string) ([]byte, string, successStatus) {
 	filePath := p.getFileByHash(hash)
 	if filePath == nil {
-		return nil, STATUS_NO_HASH
+		return nil, "", STATUS_NO_HASH
 	}
 
 	return filePath.readFile(p.currDir)
@@ -675,22 +689,22 @@ func (p pathCollective) walkDirAndToBytes() ([]byte, successStatus) {
 	return []byte(str), STATUS_WALK_SUCCESS
 }
 
-func (p pathCollective) filterAndStatEntity(hash string) ([]byte, successStatus) {
+func (p pathCollective) filterAndStatEntity(hash string) ([]byte, string, successStatus) {
 	entity := p.getFileByHash(hash)
 	if entity == nil {
 		entity = p.getSubDirByHash(hash)
 	}
 	if entity == nil {
-		return nil, STATUS_NO_HASH
+		return nil, "", STATUS_NO_HASH
 	}
 
-	fileOrDirState, stat := entity.statEntity(p.currDir)
+	fileOrDirState, path, stat := entity.statEntity(p.currDir)
 
 	if stat != STATUS_DID_STAT {
-		return nil, STATUS_DID_FAIL
+		return nil, "", stat
 	}
 
-	return fileOrDirState, stat
+	return fileOrDirState, path, stat
 }
 
 func (ps *pathState) cdAndSetFilesAndSubdirs(hash string) successStatus {
@@ -939,6 +953,10 @@ func (r responseCode) toString() string {
 		respText = "WRONG_COMMAND"
 	case RESPONSE_LISTED_STATES:
 		respText = "STATES_LISTED"
+	case RESPONSE_READ_FILE_OK:
+		respText = "BYTES_READ"
+	case RESPONSE_IS_NOT_DIR:
+		respText = "IS_NOT_DIR"
 	}
 
 	return fmt.Sprintf("%d - %s\n\n", r, respText)
@@ -959,4 +977,12 @@ func trimHash(hash string) string {
 	}
 
 	return fin
+}
+
+func addHeader(path, headerSet string, contents []byte) []byte {
+	header := []byte(fmt.Sprintf("%s%s: %s;\n", GLOBAL_HEADER_PREFIX, headerSet, path))
+	contentsWithHeader := header
+	contentsWithHeader = append(contentsWithHeader, contents...)
+
+	return contentsWithHeader
 }

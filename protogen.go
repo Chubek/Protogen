@@ -80,7 +80,7 @@ func (prg ProgramFunction) executeSuitable(argsSlice prototype.StrSlice) {
 		interval := parseAndCheckInterval(getArgOut(argsSlice, "-i", "--interval", false))
 		protoquote.ProtoQuoteMain(address, interval)
 	case PROTODIR:
-		checkArgsSliceLen(argsSlice, 1, 2)
+		checkArgsSliceLen(argsSlice, 2, 6)
 		path := checkUnixPath(getArgOut(argsSlice, "-p", "--path", true))
 		ttl := parseAndCheckTtl(getArgOut(argsSlice, "-t", "--ttl", false))
 		clearInterval := parseAndCheckClearInterval(getArgOut(argsSlice, "-c", "--clear_interval", false))
