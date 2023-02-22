@@ -1,0 +1,10 @@
+[Unit]
+Description=ProtoQuote random quote protocol
+
+[Service]
+ExecStart=/usr/bin/protogen quote -a 0.0.0.0:8888
+ExcecStop=/bin/fuser -k 8888/tcp
+ExecReload=/bin/fuser -k 8888/tcp; /usr/bin/protogen quote -a 0.0.0.0:8888
+
+[Install]
+WantedBy=multi-user.target
