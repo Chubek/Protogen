@@ -4,6 +4,7 @@ ProtoGen (**Gen**eric **Proto**col) is a collection of useful and educational ap
 
 Currently:
 * ProtoQute/TCP/Random Quote Protocol
+* ProtoMath/TCP/Equation Solve Protocol
 * ProtoDir/UDM/Directory Listing Protocol
 
 * [ProtoDir](#protodir)
@@ -136,6 +137,14 @@ The final list of all commands:
 * WALK_TREE (1 hash)
 * LIST_STATES (no hash)
 
+# ProtoMath
+
+Run it:
+```
+protogen math -a <tcp addr with port>
+```
+
+And then `echo 'PTMP/1 2 + 2' | nc <addr> <port>`
 
 # ProtoQuote
 
