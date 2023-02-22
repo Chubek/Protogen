@@ -92,14 +92,14 @@ func makeSureAllowed(by []byte) bool {
 
 func solveEquation(eq []byte) ([]byte, responseType) {
 	str := string(eq)
-	if !strings.Contains(str, "PTMP/1 ") {
+	if !strings.Contains(str, "PTMPv1 ") {
 		return nil, RESPONSE_REQPARSE_FAILED
 	}
 	if strings.Contains(str, "**") {
 		return nil, RESPONSE_UNSUPPORTED_OP
 	}
 
-	str = strings.Replace(str, "PTMP/1 ", "", -1)
+	str = strings.Replace(str, "PTMPv1 ", "", -1)
 
 	isAlowed := makeSureAllowed([]byte(str))
 	if !isAlowed {

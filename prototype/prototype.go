@@ -94,8 +94,8 @@ func (s *Stack) Push(str string) {
 func (s *Stack) DoOp(opOne, opTwo, operator string) bool {
 	var res float64
 
-	firstParsed, successFirst := parseToFloat(opOne)
-	secondParsed, successSecond := parseToFloat(opTwo)
+	firstParsed, successFirst := parseToFloat(opTwo)
+	secondParsed, successSecond := parseToFloat(opOne)
 
 	if !successFirst || !successSecond {
 		return false

@@ -144,7 +144,7 @@ Run it:
 protogen math -a <tcp addr with port>
 ```
 
-And then `echo 'PTMP/1 2 + 2' | nc <addr> <port>`
+And then `echo 'PTMPv1 2 + 2' | nc <addr> <port>`
 
 # ProtoQuote
 
