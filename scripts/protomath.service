@@ -1,0 +1,10 @@
+[Unit]
+Description=ProtoQuote random math protocol
+
+[Service]
+ExecStart=/usr/bin/protogen math -a 0.0.0.0:9999
+ExcecStop=/bin/fuser -k 9999/tcp
+ExecReload=/bin/fuser -k 9999/tcp; /usr/bin/protogen math -a 0.0.0.0:9999
+
+[Install]
+WantedBy=multi-user.target

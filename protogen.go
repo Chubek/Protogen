@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/signal"
 	"protogen/protodir"
+	"protogen/protomath"
 	"protogen/protoquote"
 	"protogen/prototype"
 	"regexp"
@@ -12,12 +13,13 @@ import (
 	"syscall"
 )
 
-type ProgramFunction int
+type programFunction int
 
 const (
-	PROTOQUOTE ProgramFunction = 0
-	PROTODIR   ProgramFunction = 1
-	NONE       ProgramFunction = -1
+	PROTOQUOTE programFunction = 0
+	PROTODIR   programFunction = 1
+	PROTOMATH  programFunction = 2
+	NONE       programFunction = -1
 )
 
 var (
@@ -59,12 +61,14 @@ func pollForExit(proto string, cleanerUpper func()) {
 	<-finish
 }
 
-func getProgFunc(firstArg string) (ProgramFunction, string, func()) {
+func getProgFunc(firstArg string) (programFunction, string, func()) {
 	switch firstArg {
 	case "quote", "protoquote":
 		return PROTOQUOTE, "ProtoQuote", protoquote.CleanUpProtoQuote
 	case "dir", "protodir":
 		return PROTODIR, "ProtoDir", protodir.CleanUpProtoDir
+	case "math", "protomath":
+		return PROTOMATH, "ProtoMath", protomath.CleanUpProtoMath
 	default:
 		break
 	}
@@ -72,7 +76,7 @@ func getProgFunc(firstArg string) (ProgramFunction, string, func()) {
 	return NONE, "None", nil
 }
 
-func (prg ProgramFunction) executeSuitable(argsSlice prototype.StrSlice) {
+func (prg programFunction) executeSuitable(argsSlice prototype.StrSlice) {
 	switch prg {
 	case PROTOQUOTE:
 		checkArgsSliceLen(argsSlice, 2, 4)
@@ -85,6 +89,10 @@ func (prg ProgramFunction) executeSuitable(argsSlice prototype.StrSlice) {
 		ttl := parseAndCheckTtl(getArgOut(argsSlice, "-t", "--ttl", false))
 		clearInterval := parseAndCheckClearInterval(getArgOut(argsSlice, "-c", "--clear_interval", false))
 		protodir.ProtoDirMain(path, ttl, clearInterval)
+	case PROTOMATH:
+		checkArgsSliceLen(argsSlice, 2, 2)
+		address := checkHostAddr(getArgOut(argsSlice, "-a", "--addr", true))
+		protomath.ProtoMathMain(address)
 	case NONE:
 		errorOutStr("No valid subsystem given as first argument")
 	}

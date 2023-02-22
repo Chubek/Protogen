@@ -8,6 +8,8 @@ Step #4: Now `protogen` is moved to /usr/bin and `protoquote.service` is moved t
 
 Step #5: Now run `sudo systemcl daemon-reload && sudo systemctl enable protoquote && sudo systemctl start protoquote` --- this will enable and run the protoquote service. 
 
-Now protoquote is running on TCP port 8888. To restart and stop use `sudo systemctl restart protoquote` and `sudo systemctl stop protoquote` respectively
+Now protoquote is running on TCP port 8888. To restart and stop use `sudo systemctl restart protoquote` and `sudo systemctl stop protoquote` respectively.
+
+**Node**: The same process is repeatable for protomath.servce, starting on 9999/tcp
 
 If you wish so, both `install.sh` and `protoquote.service` are inside the `sciprts` folder.
